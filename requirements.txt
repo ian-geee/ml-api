@@ -1,0 +1,13 @@
+fastapi
+uvicorn[standard]
+scikit-learn
+xgboost
+joblib
+pydantic>=2
+pydantic-settings
+mlflow
+slowapi
+numpy
+pandas
+httpx  # car pytest grosse librairie de fils de pute qui ne renseigne pas évidemment sur les requis pour debug une api. Fils de pute de merde.
+pytest

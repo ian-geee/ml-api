@@ -1,0 +1,14 @@
+{
+  "feature_order": [
+    "GrLivArea",
+    "OverallQual",
+    "YearBuilt",
+    "GarageCars",
+    "FullBath",
+    "LotArea"
+  ],
+  "target": "SalePrice",
+  "transform": "log1p",
+  "currency": "USD",
+  "model_version": "house-v1"
+}
