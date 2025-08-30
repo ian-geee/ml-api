@@ -3,7 +3,6 @@ from fastapi import APIRouter, Depends, Header, HTTPException, Request
 from app.schemas.iris import FlowerDims, IrisOutput
 from app.services.iris_service import IrisService
 from app.core.config import settings
-import snoop
 
 router = APIRouter(prefix="/api/v1/iris", tags=["iris"])
 
