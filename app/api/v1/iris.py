@@ -6,7 +6,6 @@ from app.core.config import settings
 
 router = APIRouter(prefix="/api/v1/iris", tags=["iris"])
 
-@snoop(depth=1)
 def get_iris_service(request: Request) -> IrisService:
     svc = getattr(request.app.state, "iris_service", None)
     if svc is None:
