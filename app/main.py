@@ -1,4 +1,3 @@
-
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -25,7 +24,7 @@ class BodySizeLimiter(BaseHTTPMiddleware):
         return await call_next(request)
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
+async def lifespan(app: FastAPI): # Utilisation de lifespan justifie la déclaration d'un client 'app' dans les test pytest
     app.state.iris_service = IrisService(settings.model_dir)   # FileNotFoundError -> crash
     app.state.house_service = HouseService(settings.model_dir) # idem
     yield
