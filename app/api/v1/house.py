@@ -17,4 +17,4 @@ def health(svc: HouseService = Depends(get_house_service)):
 @router.post("/predict", response_model=HouseOutput)
 def predict(payload: HouseInput, svc: HouseService = Depends(get_house_service)):
     price = svc.predict(payload)
-    return {"price_usd": price}
+    return {"price_euro": price}

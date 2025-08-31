@@ -16,7 +16,7 @@ python train_model.py
 
 ## 2) Launching the API 
 ```bash
-uvicorn app:app --reload --host 0.0.0.0 --port 8000
+uvicorn app.main:app --reload --host 0.0.0.0 --port 8000  # app.main et pas app/main....
 ```
 
 Quick tests :

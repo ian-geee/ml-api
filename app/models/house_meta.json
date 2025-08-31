@@ -1,14 +1,15 @@
 {
   "feature_order": [
-    "GrLivArea",
-    "OverallQual",
-    "YearBuilt",
-    "GarageCars",
-    "FullBath",
-    "LotArea"
+    "habitable_surface",
+    "bedrooms_count",
+    "num_facade",
+    "post_code"
   ],
-  "target": "SalePrice",
+  "categorical": [
+    "post_code"
+  ],
+  "target": "price",
   "transform": "log1p",
-  "currency": "USD",
-  "model_version": "house-v1"
+  "currency": "EUR",
+  "model_version": "house-4feat-v1"
 }
