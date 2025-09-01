@@ -8,7 +8,7 @@ class HouseService:
         p = Path(model_dir)
         with open(p / "house_meta.json", "r", encoding="utf-8") as f:
             self.meta = json.load(f)
-        self.pipe = joblib.load(p / "house_model.joblib") # a la base self.model car gros débiles de dev de merde qui savent pas faire la différence entre un objet Pipe et un objet Model dans leur propre DOC
+        self.pipe = joblib.load(p / "house_model.joblib") # a la base self.model car dev de joblib ne savent pas faire la différence entre un objet Pipe et un objet Model dans leur propre DOC
         self.feature_order = self.meta["feature_order"]
 
     def predict(self, payload) -> float:
@@ -22,6 +22,7 @@ class HouseService:
             X[col] = pd.to_numeric(X[col], errors="coerce")
 
         # 3) Prédire
-        y_hat = self.pipe.predict(X)[0] # a la base self.model car gros débiles de dev de merde qui savent pas faire la différence entre un objet Pipe et un objet Model dans leur propre DOC
+        y_hat = self.pipe.predict(X)[0] # a la base self.model car dev de joblib ne savent pas faire la différence entre un objet Pipe et un objet Model dans leur propre DOC
         y = float(np.expm1(y_hat)) if self.meta.get("transform") == "log1p" else float(y_hat)
+
         return y
