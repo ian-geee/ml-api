@@ -19,13 +19,9 @@ def check_api_key(x_api_key: str | None = Header(default=None, convert_underscor
 
 @router.get("/health")
 def health(svc: WineService = Depends(get_wine_service)):
-    return {
-        "status": "ok",
-        "model": svc.meta.get("model_type"),
-        "model_version": svc.meta.get("model_version"),
-        "classes": svc.class_names,
-    }
+    return {"status":"ok", "features": svc.feature_order}
 
 @router.post("/predict", response_model=WineOutput)
-def predict(payload: WineInput, svc: WineService = Depends(get_wine_service), _: None = Depends(check_api_key)):
-    return svc.predict(payload)
+def predict(payload: WineInput, svc: WineService = Depends(get_wine_service)):
+    quality = svc.predict(payload)
+    return {"quality": quality} # mandatory to return a dict, return svc.predict(payload) return une erreur
