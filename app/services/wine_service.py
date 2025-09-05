@@ -16,9 +16,6 @@ class WineService:
         row = {f: getattr(payload, f) for f in self.feature_order}
         X = pd.DataFrame([row], columns=self.feature_order)
 
-        # Conversion de mg/L en mg/cl pour le feature 'sulphates
-        X['sulphates'] = X['sulphates'] / 100.0
-
         # 3) Prédire
         y_hat = self.pipe.predict(X)[0]
         y = round(float(y_hat), 2)
