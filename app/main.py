@@ -11,6 +11,9 @@ from app.api.v1.iris import router as iris_router
 from app.services.house_service import HouseService
 from app.api.v1.house import router as house_router
 
+from app.services.wine_service import WineService
+from app.api.v1.wine import router as wine_router
+
 class BodySizeLimiter(BaseHTTPMiddleware):
     def __init__(self, app, max_bytes: int = 8 * 1024):
         super().__init__(app); self.max = max_bytes
@@ -27,6 +30,7 @@ class BodySizeLimiter(BaseHTTPMiddleware):
 async def lifespan(app: FastAPI): # Utilisation de lifespan justifie la déclaration d'un client 'app' dans les test pytest
     app.state.iris_service = IrisService(settings.model_dir)   # FileNotFoundError -> crash
     app.state.house_service = HouseService(settings.model_dir) # idem
+    app.state.wine_service = WineService(settings.model_dir) # idem
     yield
 
 app = FastAPI(title="Portfolio API", version="v1", lifespan=lifespan)
@@ -55,3 +59,4 @@ def health():
 
 app.include_router(iris_router)
 app.include_router(house_router)
+app.include_router(wine_router)
