@@ -11,5 +11,6 @@
   "target": "price",
   "transform": "log1p",
   "currency": "EUR",
-  "model_version": "house-4feat-v1"
+  "model_version": "house-4feat-v1",
+  "rmse_eur": 125131.58871001673
 }
