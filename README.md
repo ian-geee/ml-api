@@ -9,9 +9,14 @@ python -m venv .venv
 pip install -r requirements.txt
 ```
 
-## 1) Training the model
+## 1) Training the modeld
 ```bash
-python train_model.py
+python .\scripts\train_model.py
+```
+
+## 1b) Check training quality with MLFlow
+```bash
+mlflow ui --backend-store-uri file:./mlruns --host 127.0.0.1 --port 5000
 ```
 
 ## 2) Launching the API 
@@ -37,7 +42,7 @@ docker run -e ML_API_KEY=secret_key -p 8000:8000 iris-api
 ```
 
 ## 5) Deployment
-- As of 2025-08-29, the API is hosted on Render : https://flower-api-daaw.onrender.com
+- As of 2025-08-29, the API is hosted on Render : https://ml-api-nbek.onrender.com
 
 ---
  Thanks for reading through !
