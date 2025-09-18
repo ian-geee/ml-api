@@ -6,6 +6,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 from sklearn.datasets import load_iris
+from utils import sanitize_columns
 
 def main():
     parser = argparse.ArgumentParser()

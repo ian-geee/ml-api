@@ -47,4 +47,10 @@ docker run -e ML_API_KEY=secret_key -p 8000:8000 iris-api
 ---
  Thanks for reading through !
 
+
  Update
+
+## pyproject.toml :
+Required for installing utils scripts and be able to use them with any Python.exe. Otherwise, if we just include utils, we need to launch Python from the root of the folder, so that python can find utils with 'from utils import xxx'
+
+### => Need to install from utils with : pip install -e .
