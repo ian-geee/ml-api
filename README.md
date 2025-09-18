@@ -54,3 +54,12 @@ docker run -e ML_API_KEY=secret_key -p 8000:8000 iris-api
 Required for installing utils scripts and be able to use them with any Python.exe. Otherwise, if we just include utils, we need to launch Python from the root of the folder, so that python can find utils with 'from utils import xxx'
 
 ### => Need to install from utils with : pip install -e .
+
+## Choice between Airflown, Prefect & Flyte for steps pipelining in the inner_loop : 
+Airflow & Flyte being unix-based + Airflow being very "industrial" (hard to manage on solo), I go with Prefect
+
+## Architecture :
+- Prefect: Automation Pipeline to chain scripts to train models
+- DVC: Saves outputs of every script and versions them
+- MLFlow : Saves metrics inside the training/scoring/eval
+- Scikit-learn pipeline : allows our future predictions to be treated with the same preprocessing/feature engineering as our training/validation set.
