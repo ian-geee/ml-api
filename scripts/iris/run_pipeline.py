@@ -7,6 +7,8 @@ from typing import Any, Dict
 import yaml
 from prefect import flow, task, get_run_logger
 
+REPO_ROOT = Path(__file__).resolve().parents[2]  # racine = 2 niveaux au-dessus de scripts/iris
+
 PLACEHOLDER = re.compile(r"\$\{\{([^}]+)\}\}")
 
 def load_yaml(p: Path) -> Dict[str, Any]:
@@ -15,12 +17,6 @@ def load_yaml(p: Path) -> Dict[str, Any]:
     """
     with p.open("r", encoding="utf-8") as f:
         return yaml.safe_load(f)
-
-def ensure_parents(path: str | Path):
-    """
-    Assure que les dossiers parents des fichiers que nous allons sauvegarder sont bien présents, en les créant ou pas s'ils existent déjà (exist_ok = True)
-    """
-    Path(path).parent.mkdir(parents=True, exist_ok=True)
 
 def substitute(s: str, mapping: Dict[str, str]) -> str:
     def repl(m):
@@ -41,11 +37,23 @@ def run_step(step_cfg: Dict[str, Any], gctx: Dict[str, Dict[str, str]]) -> Dict[
 
     name = step_cfg["name"] # step_cfg = {'name': 'prep', 'component': 'components/prep.yaml', 'with': {'inputs': {}, 'outputs': {'out_dir': 'saves/iris', 'csv': 'saves/iris/iris.csv', 'meta': 'saves/iris/meta.json'}}}
     comp_path = Path(step_cfg["component"]) # comp_path = Path('components/prep.yaml')
-    comp = load_yaml(comp_path) # comp = {'$schema': 'local.commandComponent', 'name': 'prepare_iris', 'display_name': 'PrepIris', 'version': 1, 'type': 'command', 'inputs': {}, 'outputs': {'csv': {...}, 'meta': {...}}, 'code': '../prep_src', 'environment': 'local/python', 'command': 'python prep.py --output ${{outputs.out_dir}}', 'defaults': {'out_dir': 'saves/iris'}}
+    comp = load_yaml(comp_path) # comp = {'$schema': 'local.commandComponent', 'name': 'prepare_iris', 'display_name': 'PrepIris', 'version': 1, 'type': 'command', 'inputs': {}, 'outputs': {'csv': {...}, 'meta': {...}}, 'code': '../prep_src', 'environment': 'local/python', 'command': 'python prep.py --output ${{outputs.out_dir}}'}
 
     step_with = step_cfg.get("with", {}) # step_with = {'inputs': {}, 'outputs': {'out_dir': 'saves/iris', 'csv': 'saves/iris/iris.csv', 'meta': 'saves/iris/meta.json'}}
     step_inputs = step_with.get("inputs", {}) or {} # step_inputs = {}
     step_outputs = step_with.get("outputs", {}) or {} # step_outputs = {'out_dir': 'saves/iris', 'csv': 'saves/iris/iris.csv', 'meta': 'saves/iris/meta.json'}
+
+    # 🔒 Ancrer tous les outputs sur la racine du repo (chemins ABSOLUS)
+    norm_outputs = {}
+    for k, v in step_outputs.items():
+        p = Path(v) # p = WindowsPath('saves/temp')
+        if not p.is_absolute():
+            p = (REPO_ROOT / p).resolve() # REPO_ROOT = WindowsPath('C:/Users/joule/work_repos/ml-api') (défini par user en haut)
+            # REPO_ROOT / p = WindowsPath('C:/Users/joule/work_repos/ml-api/saves/iris')
+            # p = WindowsPath('C:/Users/joule/work_repos/ml-api/saves/iris/meta.json')
+        norm_outputs[k] = p.as_posix() # p.as_posix() = 'C:/Users/joule/work_repos/ml-api/saves/temp/meta.json'
+    step_outputs = norm_outputs
+    # step_outputs = {'out_dir': 'C:/Users/joule/work_repos/ml-api/saves/iris', 'csv': 'C:/Users/joule/work_repos/ml-api/saves/iris/iris.csv', 'meta': 'C:/Users/joule/work_repos/ml-api/saves/iris/meta.json'}
 
     # mapping disponible pour la substitution
     mapping: Dict[str, str] = {}
@@ -60,49 +68,42 @@ def run_step(step_cfg: Dict[str, Any], gctx: Dict[str, Dict[str, str]]) -> Dict[
         mapping[f"inputs.{k}"] = str(v) # mapping = {}
 
     # outputs déclarés (fixe le chemin final)
-    for k, v in step_outputs.items(): # step_outputs = {'out_dir': 'saves/iris', 'csv': 'saves/iris/iris.csv', 'meta': 'saves/iris/meta.json'}
-        mapping[f"outputs.{k}"] = str(v) # mapping = {'outputs.out_dir': 'saves/iris', 'outputs.csv': 'saves/iris/iris.csv', 'outputs.meta': 'saves/iris/meta.json'}
-        # last k = "meta", last v = 'saves/iris/meta.json'
+    for k, v in step_outputs.items(): # step_outputs = {'out_dir': 'C:/Users/joule/work_repos/ml-api/saves/iris', 'csv': 'C:/Users/joule/work_repos/ml-api/saves/iris/iris.csv', 'meta': 'C:/Users/joule/work_repos/ml-api/saves/iris/meta.json'}
+        mapping[f"outputs.{k}"] = str(v) # mapping = {'outputs.out_dir': 'C:/Users/joule/work_repos/ml-api/saves/iris', 'outputs.csv': 'C:/Users/joule/work_repos/ml-api/saves/iris/iris.csv', 'outputs.meta': 'C:/Users/joule/work_repos/ml-api/saves/iris/meta.json'}
+        # last k = "meta", last v = 'C:/Users/joule/work_repos/ml-api/saves/iris/meta.json'
 
     # Construire la commande
     raw_cmd = comp["command"] # raw_cmd = 'python prep.py --output ${{outputs.out_dir}}',
     cmd = substitute(raw_cmd, mapping) # mapping = {'outputs.out_dir': 'saves/iris', 'outputs.csv': 'saves/iris/iris.csv', 'outputs.meta': 'saves/iris/meta.json'}
-    # cmd = 'python prep.py --output saves/iris'
+    # cmd = 'python prep.py --output C:/Users/joule/work_repos/ml-api/saves/iris'
 
 
-    # Prépare WD + env
+    # Le workdir du script prep.py
     workdir = (comp_path.parent / comp["code"]).resolve() # L’opérateur / de pathlib.Path accepte un str à droite et retourne un nouveau path ; .resolve() vient après : il transforme ce chemin en chemin absolu
     # workdir = WindowsPath('C:/Users/joule/work_repos/ml-api/scripts/iris/prep_src')
     # comp["code"] = '../prep_src'
     # comp_path = WindowsPath('components/prep.yaml')
     # comp_path.parent = WindowsPath('components')
-    
-    workdir.mkdir(parents=True, exist_ok=True) # crée le dossier s’il n’existe pas (et ses parents existent)
-
-    # Crée les dossiers des outputs
-    for v in step_outputs.values(): # step_outputs = {'out_dir': 'saves/iris', 'csv': 'saves/iris/iris.csv', 'meta': 'saves/iris/meta.json'}
-        ensure_parents(v) # après ça, on est sur de pouvoir enregistrer les fichiers là ou nous le souhaitons
         
-
     logger.info(f"[{name}] Command: {cmd}") # logger.info équivaut à un print
     logger.info(f"[{name}] Current Working Dir: {workdir}")
 
     # Lance le process : 
-    parts = shlex.split(cmd) # shlex coupe la commande : cmd = 'python prep.py --output saves/iris' en plusieurs mots
+    parts = shlex.split(cmd) # shlex coupe la commande : cmd = 'python prep.py --output C:/Users/joule/work_repos/ml-api/saves/iris' en plusieurs mots
     # Ici sert à lancer le bon Python (celui du venv et pas un autre ? Mais wtf encore) qui est sys.executable : 'C:\\Users\\joule\\work_repos\\ml-api\\.venv\\Scripts\\python.exe'
     if parts and parts[0].lower() in {"python", "python3", "py"}:
         parts[0] = sys.executable # On remplace le premier mot, càd python dans la liste des morceaux de la commande par le path correct vers l'exécutable python du venv
 
     proc = subprocess.run(
-        parts, # parts = ['C:\\Users\\joule\\work_repos\\ml-api\\.venv\\Scripts\\python.exe', 'prep.py', '--output', 'saves/iris']
+        parts, # parts = ['C:\\Users\\joule\\work_repos\\ml-api\\.venv\\Scripts\\python.exe', 'prep.py', '--output', 'C:/Users/joule/work_repos/ml-api/saves/iris']
         cwd=str(workdir),
         env=os.environ.copy(),
         text=True,
         capture_output=True
     )
     # Log
-    if proc.stdout: # proc.stdout = 'Wrote: C:\\Users\\joule\\work_repos\\ml-api\\scripts\\iris\\prep_src\\saves\\iris\\iris.csv\nWrote: C:\\Users\\joule\\work_repos\\ml-api\\scripts\\iris\\prep_src\\saves\\iris\\meta.json\n'
-        logger.info(proc.stdout.strip()) # print :  Wrote: C:\Users\joule\work_repos\ml-api\scripts\iris\prep_src\saves\iris\iris.csv & Wrote: C:\Users\joule\work_repos\ml-api\scripts\iris\prep_src\saves\iris\meta.json
+    if proc.stdout: # proc.stdout = 'Wrote: C:\\Users\\joule\\work_repos\\ml-api\\saves\\iris\\iris.csv\nWrote: C:\\Users\\joule\\work_repos\\ml-api\\saves\\iris\\meta.json\n'
+        logger.info(proc.stdout.strip()) # print :  Wrote: C:\Users\joule\work_repos\ml-api\saves\iris\iris.csv & Wrote: C:\Users\joule\work_repos\ml-api\saves\iris\meta.json
     if proc.stderr: # proc.stderr = '' (empty string cause no error)
         logger.warning(proc.stderr.strip())
 
@@ -119,15 +120,17 @@ def run_pipeline(pipeline_yaml: str = "pipeline.yaml"):
     ${{inputs.*}}, ${{outputs.*}} et ${{steps.<name>.outputs.*}}.
     """
     logger = get_run_logger()
-    cfg = load_yaml(Path(pipeline_yaml))
-    steps = cfg["steps"]
+    cfg = load_yaml(Path(pipeline_yaml)) # pipeline_yaml = 'C:\\Users\\joule\\work_repos\\ml-api/scripts/iris/pipeline.yaml'
+    steps = cfg["steps"] # cfg = {'$schema': 'local.pipeline', 'name': 'iris_local_pipeline', 'version': 1, 'steps': [{...}]}
+    # steps = cfg["steps"] = [{'name': 'prep', 'component': 'components/prep.yaml', 'with': {...}}]
+    # cfg["steps"][0]["with"] = {'inputs': {}, 'outputs': {'out_dir': 'saves/iris', 'csv': 'saves/iris/iris.csv', 'meta': 'saves/iris/meta.json'}}
 
     graph_ctx: Dict[str, Dict[str, str]] = {}
 
-    for step in steps:
+    for step in steps: # 1 seul step: prep
         name = step["name"]
-        outs = run_step(step, graph_ctx)
-        graph_ctx[name] = outs
+        outs = run_step(step, graph_ctx) # outs = {'out_dir': 'C:/Users/joule/work_repos/ml-api/saves/iris', 'csv': 'C:/Users/joule/work_repos/ml-api/saves/iris/iris.csv', 'meta': 'C:/Users/joule/work_repos/ml-api/saves/iris/meta.json'}
+        graph_ctx[name] = outs # graph_ctx = {'prep': {'out_dir': 'C:/Users/joule/work_repos/ml-api/saves/iris', 'csv': 'C:/Users/joule/work_repos/ml-api/saves/iris/iris.csv', 'meta': 'C:/Users/joule/work_repos/ml-api/saves/iris/meta.json'}}
         logger.info(f"[{name}] outputs: {outs}")
 
     logger.info("[pipeline] DONE")
