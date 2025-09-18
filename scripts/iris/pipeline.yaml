@@ -9,9 +9,9 @@ steps:
       inputs: {}
       outputs:
         # on fige explicitement les chemins produits par prep
-        out_dir: saves/iris           # passé au script via ${{outputs.out_dir}}
-        csv: saves/iris/iris.csv      # pour rendu aux steps suivants
-        meta: saves/iris/meta.json
+        out_dir: saves/temp        # passé au script via ${{outputs.out_dir}}
+        csv: saves/temp/iris.csv      # pour rendu aux steps suivants
+        meta: saves/temp/meta.json
 
   # - name: train
   #   component: components/train.yaml

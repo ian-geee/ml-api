@@ -19,7 +19,3 @@ environment: local/python
 command: >-
   python prep.py
   --output ${{outputs.out_dir}}
-
-# Optionnel: une clé "defaults" pour standardiser une sortie dossier
-defaults:
-  out_dir: saves/iris

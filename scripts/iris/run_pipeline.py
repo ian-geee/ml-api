@@ -64,13 +64,6 @@ def run_step(step_cfg: Dict[str, Any], gctx: Dict[str, Dict[str, str]]) -> Dict[
         mapping[f"outputs.{k}"] = str(v) # mapping = {'outputs.out_dir': 'saves/iris', 'outputs.csv': 'saves/iris/iris.csv', 'outputs.meta': 'saves/iris/meta.json'}
         # last k = "meta", last v = 'saves/iris/meta.json'
 
-    # defaults du composant (optionnel)
-    for k, v in (comp.get("defaults") or {}).items(): # comp.get("defaults") = {'out_dir': 'saves/iris'}
-        mapping[f"outputs.{k}"] = mapping.get(f"outputs.{k}", str(v)) 
-    # mapping = {'outputs.out_dir': 'saves/iris', 'outputs.csv': 'saves/iris/iris.csv', 'outputs.meta': 'saves/iris/meta.json'},
-    # last k = 'out_dir',
-    # last v = 'saves/iris'
-
     # Construire la commande
     raw_cmd = comp["command"] # raw_cmd = 'python prep.py --output ${{outputs.out_dir}}',
     cmd = substitute(raw_cmd, mapping) # mapping = {'outputs.out_dir': 'saves/iris', 'outputs.csv': 'saves/iris/iris.csv', 'outputs.meta': 'saves/iris/meta.json'}
@@ -91,8 +84,8 @@ def run_step(step_cfg: Dict[str, Any], gctx: Dict[str, Dict[str, str]]) -> Dict[
         ensure_parents(v) # après ça, on est sur de pouvoir enregistrer les fichiers là ou nous le souhaitons
         
 
-    logger.info(f"[{name}] CMD: {cmd}") # logger.info équivaut à un print
-    logger.info(f"[{name}] CWD: {workdir}")
+    logger.info(f"[{name}] Command: {cmd}") # logger.info équivaut à un print
+    logger.info(f"[{name}] Current Working Dir: {workdir}")
 
     # Lance le process : 
     parts = shlex.split(cmd) # shlex coupe la commande : cmd = 'python prep.py --output saves/iris' en plusieurs mots
