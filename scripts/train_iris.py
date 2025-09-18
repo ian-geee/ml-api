@@ -11,6 +11,8 @@ from pathlib import Path
 MODELS = Path("app/models")
 MODELS.mkdir(parents=True, exist_ok=True)
 
+def 
+
 if __name__ == "__main__":
     X, y = load_iris(return_X_y=True)
     feature_names = ["sepal_length", "sepal_width", "petal_length", "petal_width"]
