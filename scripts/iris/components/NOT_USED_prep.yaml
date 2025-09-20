@@ -1,0 +1,21 @@
+# <component>
+$schema: local.commandComponent # schema à créer plus tard pour validation du format
+name: prepare_iris
+display_name: PrepIris
+version: 1
+type: command
+
+inputs:
+  input_data: 
+    type: uri_folder 
+outputs:
+  prep_data:
+    type: uri_folder
+
+code: ../prep_src
+environment: local/python
+command: >-
+  python prep.py
+  --input_data ${{inputs.raw_data}} 
+  --prep_data ${{outputs.prep_data}}
+# </component>
