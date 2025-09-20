@@ -10,6 +10,7 @@ from prefect.runtime import flow_run
 from prep_src.prep import prep_flow
 from train_src.train import train_flow
 from score_src.score import score_flow
+from eval_src.eval import eval_flow
 
 RANDOM_STATE = 42
 
@@ -46,13 +47,13 @@ def run_pipeline() -> None:
 
     data_folder = make_output_dir(output="scripts/iris/runs/" + run_id + "/data")
     model_folder = make_output_dir(output="scripts/iris/runs/" + run_id + "/models")
-    make_output_dir(output="scripts/iris/runs/" + run_id + "/score")
-    make_output_dir(output="scripts/iris/runs/" + run_id + "/eval")
+    eval_folder = make_output_dir(output="scripts/iris/runs/" + run_id + "/eval")
 
 
     prep_flow(in_raw_data_folder=RAW_DATA_PATH, out_clean_data_folder=data_folder)
     train_flow(data_input_dir=data_folder, data_output_dir=data_folder, model_output_dir=model_folder)
     score_flow(data_input_dir=data_folder, model_input_dir=model_folder, data_output_dir=data_folder)
+    eval_flow(data_input_dir=data_folder, metrics_output_dir=eval_folder)
     return None
 
 if __name__ == "__main__":
