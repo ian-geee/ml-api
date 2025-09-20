@@ -1,0 +1,6 @@
+destination_id: m-dac7fc6e20ab4549a4bbb772800a735e
+destination_type: MODEL_OUTPUT
+source_id: m-dac7fc6e20ab4549a4bbb772800a735e
+source_type: RUN_OUTPUT
+step: 0
+tags: {}

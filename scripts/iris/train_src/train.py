@@ -18,6 +18,8 @@ from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn.linear_model import LogisticRegression
 
+import mlflow
+
 
 
 @task
@@ -52,14 +54,22 @@ def split_dataset(in_df_to_split_folder_path: Path, out_splitted_dfs_folder_path
 
 @task
 def fit_model(in_train_dataframe_folder_path: Path, out_model_folder_path: Path):
-    df_train = pd.read_csv(in_train_dataframe_folder_path / "train.csv", index_col=False)
-    X_train = df_train.drop(columns=["target"])
-    y_train = df_train["target"]
-    pipe = Pipeline([
-        ("scaler", StandardScaler()),
-        ("clf", LogisticRegression(solver="lbfgs", max_iter=1000))
-        ])
-    pipe.fit(X_train, y_train)
+
+    # Active l’autolog AVANT fit
+    mlflow.sklearn.autolog(log_models=True)  # ou mlflow.autolog()
+
+    with mlflow.start_run(run_name="blah"):
+        df_train = pd.read_csv(in_train_dataframe_folder_path / "train.csv", index_col=False)
+        X_train = df_train.drop(columns=["target"])
+        y_train = df_train["target"]
+        pipe = Pipeline([
+            ("scaler", StandardScaler()),
+            ("clf", LogisticRegression(solver="lbfgs", max_iter=1000))
+            ])
+        pipe.fit(X_train, y_train)
+    
+
+
     joblib.dump(pipe, out_model_folder_path / "iris_model.joblib")
     return pipe
 
@@ -77,7 +87,7 @@ def train_flow(data_input_dir: Path, data_output_dir: Path, model_output_dir: Pa
 if __name__ == "__main__":
     # Lancement direct en local (sans DVC/MLflow, ni serveur Prefect nécessaire
     train_flow(
-        data_input_dir=Path('C:/Users/joule/work_repos/ml-api/scripts/iris/scripts/iris/runs/e6558b6f-0f1e-484f-8de6-5c49ee498a77/data'),
-        data_output_dir=Path('C:/Users/joule/work_repos/ml-api/scripts/iris/scripts/iris/runs/e6558b6f-0f1e-484f-8de6-5c49ee498a77/data'),
-        model_output_dir=Path('C:/Users/joule/work_repos/ml-api/scripts/iris/scripts/iris/runs/e6558b6f-0f1e-484f-8de6-5c49ee498a77/models')
+        data_input_dir=Path('C:/Users/joule/work_repos/ml-api/scripts/iris/runs/9d2143d3-fe1a-450b-9728-e0c3a30c373c/data'),
+        data_output_dir=Path('C:/Users/joule/work_repos/ml-api/scripts/iris/runs/9d2143d3-fe1a-450b-9728-e0c3a30c373c/data'),
+        model_output_dir=Path('C:/Users/joule/work_repos/ml-api/scripts/iris/runs/9d2143d3-fe1a-450b-9728-e0c3a30c373c/models')
         )
