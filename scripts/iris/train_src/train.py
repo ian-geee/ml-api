@@ -41,11 +41,13 @@ def split_dataset(in_df_to_split_folder_path: Path, out_splitted_dfs_folder_path
         X_trainval, y_trainval, test_size=0.25, stratify=y_trainval, random_state=42
     )
 
+    pd.concat([X_trainval, y_trainval], axis=1).to_csv(out_splitted_dfs_folder_path / "trainval.csv", index=False)
     pd.concat([X_train, y_train], axis=1).to_csv(out_splitted_dfs_folder_path / "train.csv", index=False)
     pd.concat([X_val, y_val], axis=1).to_csv(out_splitted_dfs_folder_path / "val.csv", index=False)
     pd.concat([X_test, y_test], axis=1).to_csv(out_splitted_dfs_folder_path / "test.csv", index=False)
 
     return {
+        "trainval": str((out_splitted_dfs_folder_path / "trainval.csv").resolve()),
         "train": str((out_splitted_dfs_folder_path / "train.csv").resolve()),
         "val": str((out_splitted_dfs_folder_path / "val.csv").resolve()),
         "test": str((out_splitted_dfs_folder_path / "test.csv").resolve()),
@@ -53,12 +55,13 @@ def split_dataset(in_df_to_split_folder_path: Path, out_splitted_dfs_folder_path
 
 
 @task
-def fit_model(in_train_dataframe_folder_path: Path, out_model_folder_path: Path):
+def fit_model(in_train_dataframe_folder_path: Path, out_model_folder_path: Path, run_id: str):
 
     # Active l’autolog AVANT fit
-    mlflow.sklearn.autolog(log_models=True)  # ou mlflow.autolog()
+    mlflow.sklearn.autolog()  # ou mlflow.autolog()
+    mlflow.set_experiment("iris")
 
-    with mlflow.start_run(run_name="blah"):
+    with mlflow.start_run(run_name=run_id):
         df_train = pd.read_csv(in_train_dataframe_folder_path / "train.csv", index_col=False)
         X_train = df_train.drop(columns=["target"])
         y_train = df_train["target"]
@@ -75,19 +78,19 @@ def fit_model(in_train_dataframe_folder_path: Path, out_model_folder_path: Path)
 
 
 @flow
-def train_flow(data_input_dir: Path, data_output_dir: Path, model_output_dir: Path) -> None:
+def train_flow(data_input_dir: Path, data_output_dir: Path, model_output_dir: Path, run_id: str) -> None:
     """
     
     """
     split_dataset(in_df_to_split_folder_path=data_input_dir, out_splitted_dfs_folder_path=data_output_dir)
-    fit_model(in_train_dataframe_folder_path=data_input_dir, out_model_folder_path=model_output_dir)
+    fit_model(in_train_dataframe_folder_path=data_input_dir, out_model_folder_path=model_output_dir, run_id=run_id)
     return None
 
 
 if __name__ == "__main__":
     # Lancement direct en local (sans DVC/MLflow, ni serveur Prefect nécessaire
     train_flow(
-        data_input_dir=Path('C:/Users/joule/work_repos/ml-api/scripts/iris/runs/9d2143d3-fe1a-450b-9728-e0c3a30c373c/data'),
-        data_output_dir=Path('C:/Users/joule/work_repos/ml-api/scripts/iris/runs/9d2143d3-fe1a-450b-9728-e0c3a30c373c/data'),
-        model_output_dir=Path('C:/Users/joule/work_repos/ml-api/scripts/iris/runs/9d2143d3-fe1a-450b-9728-e0c3a30c373c/models')
+        data_input_dir=Path('C:/Users/joule/work_repos/ml-api/scripts/iris/testruns/2025-09-20_23h4145-d6fc14b1/data'),
+        data_output_dir=Path('C:/Users/joule/work_repos/ml-api/scripts/iris/testruns/2025-09-20_23h4145-d6fc14b1/data'),
+        model_output_dir=Path('C:/Users/joule/work_repos/ml-api/scripts/iris/testruns/2025-09-20_23h4145-d6fc14b1/models')
         )
