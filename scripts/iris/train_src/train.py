@@ -17,10 +17,11 @@ from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import StratifiedKFold
 
 import mlflow
 
-
+RANDOM_STATE = 42
 
 @task
 def load_inputs():
@@ -55,6 +56,19 @@ def split_dataset(in_df_to_split_folder_path: Path, out_splitted_dfs_folder_path
 
 
 @task
+def make_folds(in_trainval_dataframe_folder_path: Path, out_json_folds_folder_path: Path, k: int = 5):
+    df = pd.read_csv(in_trainval_dataframe_folder_path / "trainval.csv")
+    y = df["target"].to_numpy()
+    skf = StratifiedKFold(n_splits=k, shuffle=True, random_state=RANDOM_STATE)
+    out_json_folds_folder_path = (out_json_folds_folder_path / "trainval_folds")
+    out_json_folds_folder_path.mkdir(parents=True, exist_ok=True)
+    for i, (tr, va) in enumerate(skf.split(np.zeros(len(y)), y)):
+        with (out_json_folds_folder_path / f"fold_{i}.json").open("w") as f:
+            json.dump({"train_idx": tr.tolist(), "val_idx": va.tolist()}, f, indent=2)
+
+
+
+@task
 def fit_model(in_train_dataframe_folder_path: Path, out_model_folder_path: Path, run_id: str):
 
     # Active l’autolog AVANT fit
@@ -83,6 +97,7 @@ def train_flow(data_input_dir: Path, data_output_dir: Path, model_output_dir: Pa
     
     """
     split_dataset(in_df_to_split_folder_path=data_input_dir, out_splitted_dfs_folder_path=data_output_dir)
+    make_folds(in_trainval_dataframe_folder_path=data_input_dir, out_json_folds_folder_path=data_input_dir, k=5)
     fit_model(in_train_dataframe_folder_path=data_input_dir, out_model_folder_path=model_output_dir, run_id=run_id)
     return None
 
@@ -92,5 +107,6 @@ if __name__ == "__main__":
     train_flow(
         data_input_dir=Path('C:/Users/joule/work_repos/ml-api/scripts/iris/testruns/2025-09-20_23h4145-d6fc14b1/data'),
         data_output_dir=Path('C:/Users/joule/work_repos/ml-api/scripts/iris/testruns/2025-09-20_23h4145-d6fc14b1/data'),
-        model_output_dir=Path('C:/Users/joule/work_repos/ml-api/scripts/iris/testruns/2025-09-20_23h4145-d6fc14b1/models')
+        model_output_dir=Path('C:/Users/joule/work_repos/ml-api/scripts/iris/testruns/2025-09-20_23h4145-d6fc14b1/models'),
+        run_id="2025-09-20_23h4145-d6fc14b1"
         )
