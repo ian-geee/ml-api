@@ -19,18 +19,18 @@ def make_output_dir(output: str) -> str:
     return str(out_dir.resolve())
 
 @materialize(f"file://temp/raw_data.csv")
-def load_raw_data_from_csv(in_put: Path, outdir: str) -> pd.DataFrame:
-    df = pd.read_csv(in_put)
-    df.to_csv(f"{outdir}/raw_data.csv", index=False, encoding="utf-8")
+def load_raw_data_from_csv(in_raw_data_folder: Path, out_clean_data_folder: Path) -> pd.DataFrame:
+    df = pd.read_csv(in_raw_data_folder / "iris.csv")
+    df.to_csv(f"{out_clean_data_folder}/raw_data.csv", index=False, encoding="utf-8")
     return df
 
 
 @flow
-def prep_flow(inputs: str, output: str) -> None:
+def prep_flow(in_raw_data_folder: Path, out_clean_data_folder: Path) -> None:
     """
     Prépare le dataset Iris et écrit iris.csv + meta.json en local, orchestré par Prefect.
     """
-    load_raw_data_from_csv(in_put=inputs, outdir=output)
+    load_raw_data_from_csv(in_raw_data_folder=in_raw_data_folder, out_clean_data_folder=out_clean_data_folder)
     return None
 
 

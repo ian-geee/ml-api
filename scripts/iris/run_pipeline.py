@@ -8,10 +8,14 @@ from prefect import flow, task, get_run_logger
 from prefect.runtime import flow_run
 
 from prep_src.prep import prep_flow
+from train_src.train import train_flow
+
+RANDOM_STATE = 42
 
 IRIS_ROOT = Path(__file__).resolve().parents[0]  
 REPO_ROOT = Path(__file__).resolve().parents[2] # racine = 2 niveaux au-dessus de scripts/iris
-INPUT = Path(REPO_ROOT / "data" / "iris.csv").resolve()
+
+RAW_DATA_PATH = (IRIS_ROOT / "data").resolve()
 
 # @task
 # def run_step() -> None:
@@ -28,7 +32,7 @@ INPUT = Path(REPO_ROOT / "data" / "iris.csv").resolve()
 def make_output_dir(output: str) -> str:
     out_dir = Path(output)
     out_dir.mkdir(parents=True, exist_ok=True)
-    return str(out_dir.resolve())
+    return out_dir.resolve()
 
 @flow(name="ml_pipeline", log_prints=True)
 def run_pipeline() -> None:
@@ -39,12 +43,14 @@ def run_pipeline() -> None:
     run_id = flow_run.id
     logger.info(run_id)
 
-    prep_out_string = make_output_dir(output="scripts/iris/runs/" + run_id + "/data")
-    make_output_dir(output="scripts/iris/runs/" + run_id + "/models")
+    data_folder = make_output_dir(output="scripts/iris/runs/" + run_id + "/data")
+    model_folder = make_output_dir(output="scripts/iris/runs/" + run_id + "/models")
     make_output_dir(output="scripts/iris/runs/" + run_id + "/score")
     make_output_dir(output="scripts/iris/runs/" + run_id + "/eval")
 
-    prep_flow(inputs=str(INPUT), output=prep_out_string)
+
+    prep_flow(in_raw_data_folder=RAW_DATA_PATH, out_clean_data_folder=data_folder)
+    # train_flow(data_input_dir=data_folder, data_output_dir=Path(data_folder), model_output_dir=Path(model_folder))
     
     return None
 
