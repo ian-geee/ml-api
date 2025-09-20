@@ -1,0 +1,34 @@
+$schema: local.pipeline
+name: iris_local_pipeline
+version: 1
+
+steps:
+  - name: prep
+    component: components/prep.yaml
+    with:
+      inputs: {}
+      outputs:
+        # on fige explicitement les chemins produits par prep
+        out_dir: saves/iris       # passé au script via ${{outputs.out_dir}}
+        csv: saves/iris/iris.csv      # pour rendu aux steps suivants
+        meta: saves/iris/meta.json
+
+  # - name: train
+  #   component: components/train.yaml
+  #   with:
+  #     inputs:
+  #       data_csv: ${{steps.prep.outputs.csv}}
+  #       meta_json: ${{steps.prep.outputs.meta}}
+  #     outputs:
+  #       model_dir: saves/iris/model_artifacts
+  #       model: saves/iris/model_artifacts/iris_model.joblib
+  #       test_data: saves/iris/test_data.csv
+
+  # - name: score
+  #   component: components/score.yaml
+  #   with:
+  #     inputs:
+  #       data_csv: ${{steps.prep.outputs.csv}}
+  #       model_path: ${{steps.train.outputs.model_path}}
+  #     outputs:
+  #       metrics_path: artifacts/metrics/metrics.json

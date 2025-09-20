@@ -14,6 +14,17 @@
                 "--reload"
             ],
             "jinja": true
+        },
+        {
+            "name": "Debug pipeline (run_pipeline.py)",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/scripts/iris/run_pipeline.py",
+            "args": ["${workspaceFolder}/scripts/iris/pipeline.yaml"],
+            "cwd": "${workspaceFolder}/scripts/iris", // obligé car sinon il launch le debugger depuis le root du repo au lieu de depuis scripts/iris et tous les chemins relatifs que Prefect utilise pour load les .yaml foirent
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "env": { "PREFECT_LOGGING_LEVEL": "DEBUG", "PIPELINE_DEBUG": "1" }
         }
     ]
 }

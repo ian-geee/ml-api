@@ -8,8 +8,12 @@ from sklearn.metrics import accuracy_score
 import joblib, json, numpy as np
 from pathlib import Path
 
+from utils import sanitize_columns
+
 MODELS = Path("app/models")
 MODELS.mkdir(parents=True, exist_ok=True)
+
+
 
 if __name__ == "__main__":
     X, y = load_iris(return_X_y=True)

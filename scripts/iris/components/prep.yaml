@@ -1,0 +1,21 @@
+$schema: local.commandComponent
+name: prepare_iris
+display_name: PrepIris
+version: 1
+type: command
+
+# Pas d'inputs requis ici
+inputs: {}
+
+# On expose ce que le script va écrire
+outputs:
+  csv:
+    type: uri_file
+  meta:
+    type: uri_file
+
+code: ../prep_src
+environment: local/python
+command: >-
+  python prep.py
+  --output ${{outputs.out_dir}}
