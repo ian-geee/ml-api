@@ -29,7 +29,7 @@ RAW_DATA_PATH = (IRIS_ROOT / "data").resolve()
 #     return None
 
 @task
-def make_output_dir(output: str) -> str:
+def make_output_dir(output: str) -> Path:
     out_dir = Path(output)
     out_dir.mkdir(parents=True, exist_ok=True)
     return out_dir.resolve()
@@ -50,7 +50,7 @@ def run_pipeline() -> None:
 
 
     prep_flow(in_raw_data_folder=RAW_DATA_PATH, out_clean_data_folder=data_folder)
-    # train_flow(data_input_dir=data_folder, data_output_dir=Path(data_folder), model_output_dir=Path(model_folder))
+    train_flow(data_input_dir=data_folder, data_output_dir=data_folder, model_output_dir=model_folder)
     
     return None
 
