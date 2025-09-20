@@ -9,6 +9,7 @@ from prefect.runtime import flow_run
 
 from prep_src.prep import prep_flow
 from train_src.train import train_flow
+from score_src.score import score_flow
 
 RANDOM_STATE = 42
 
@@ -51,7 +52,7 @@ def run_pipeline() -> None:
 
     prep_flow(in_raw_data_folder=RAW_DATA_PATH, out_clean_data_folder=data_folder)
     train_flow(data_input_dir=data_folder, data_output_dir=data_folder, model_output_dir=model_folder)
-    
+    score_flow(data_input_dir=data_folder, model_input_dir=model_folder, data_output_dir=data_folder)
     return None
 
 if __name__ == "__main__":
