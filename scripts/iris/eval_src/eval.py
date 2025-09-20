@@ -32,7 +32,7 @@ def metrics_to_json(in_predictions_df_folder_path: Path, out_metrics_folder_path
 
 
 @flow
-def eval_flow(data_input_dir: Path, metrics_output_dir: Path) -> None:
+def eval_flow(data_input_dir: Path, metrics_output_dir: Path, run_id: str) -> None:
     """
     
     """

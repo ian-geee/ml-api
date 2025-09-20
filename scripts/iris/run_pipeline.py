@@ -1,6 +1,9 @@
 from __future__ import annotations
 
 import os, re, shlex, subprocess, sys
+
+from datetime import datetime
+from zoneinfo import ZoneInfo
 from pathlib import Path
 from typing import Any, Dict
 
@@ -18,6 +21,8 @@ IRIS_ROOT = Path(__file__).resolve().parents[0]
 REPO_ROOT = Path(__file__).resolve().parents[2] # racine = 2 niveaux au-dessus de scripts/iris
 
 RAW_DATA_PATH = (IRIS_ROOT / "data").resolve()
+
+DATE_TAG = datetime.now(ZoneInfo("Europe/Brussels")).strftime("%Y-%m-%d_%Hh%M%S")
 
 # @task
 # def run_step() -> None:
@@ -45,15 +50,16 @@ def run_pipeline() -> None:
     run_id = flow_run.id
     logger.info(run_id)
 
-    data_folder = make_output_dir(output="scripts/iris/runs/" + run_id + "/data")
-    model_folder = make_output_dir(output="scripts/iris/runs/" + run_id + "/models")
-    eval_folder = make_output_dir(output="scripts/iris/runs/" + run_id + "/eval")
+    cross_run_id = DATE_TAG + "-" + run_id[:8]
 
+    data_folder = make_output_dir(output="scripts/iris/runs/custom_runs/" + cross_run_id + "/data")
+    model_folder = make_output_dir(output="scripts/iris/runs/custom_runs/" + cross_run_id + "/models")
+    eval_folder = make_output_dir(output="scripts/iris/runs/custom_runs/" + cross_run_id + "/eval")
 
-    prep_flow(in_raw_data_folder=RAW_DATA_PATH, out_clean_data_folder=data_folder)
-    train_flow(data_input_dir=data_folder, data_output_dir=data_folder, model_output_dir=model_folder)
-    score_flow(data_input_dir=data_folder, model_input_dir=model_folder, data_output_dir=data_folder)
-    eval_flow(data_input_dir=data_folder, metrics_output_dir=eval_folder)
+    prep_flow(in_raw_data_folder=RAW_DATA_PATH, out_clean_data_folder=data_folder, run_id=cross_run_id)
+    train_flow(data_input_dir=data_folder, data_output_dir=data_folder, model_output_dir=model_folder, run_id=cross_run_id)
+    score_flow(data_input_dir=data_folder, model_input_dir=model_folder, data_output_dir=data_folder, run_id=cross_run_id)
+    eval_flow(data_input_dir=data_folder, metrics_output_dir=eval_folder, run_id=cross_run_id)
     return None
 
 if __name__ == "__main__":

@@ -18,6 +18,8 @@ from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn.linear_model import LogisticRegression
 
+import mlflow
+
 
 
 @task
@@ -39,11 +41,13 @@ def split_dataset(in_df_to_split_folder_path: Path, out_splitted_dfs_folder_path
         X_trainval, y_trainval, test_size=0.25, stratify=y_trainval, random_state=42
     )
 
+    pd.concat([X_trainval, y_trainval], axis=1).to_csv(out_splitted_dfs_folder_path / "trainval.csv", index=False)
     pd.concat([X_train, y_train], axis=1).to_csv(out_splitted_dfs_folder_path / "train.csv", index=False)
     pd.concat([X_val, y_val], axis=1).to_csv(out_splitted_dfs_folder_path / "val.csv", index=False)
     pd.concat([X_test, y_test], axis=1).to_csv(out_splitted_dfs_folder_path / "test.csv", index=False)
 
     return {
+        "trainval": str((out_splitted_dfs_folder_path / "trainval.csv").resolve()),
         "train": str((out_splitted_dfs_folder_path / "train.csv").resolve()),
         "val": str((out_splitted_dfs_folder_path / "val.csv").resolve()),
         "test": str((out_splitted_dfs_folder_path / "test.csv").resolve()),
@@ -51,33 +55,42 @@ def split_dataset(in_df_to_split_folder_path: Path, out_splitted_dfs_folder_path
 
 
 @task
-def fit_model(in_train_dataframe_folder_path: Path, out_model_folder_path: Path):
-    df_train = pd.read_csv(in_train_dataframe_folder_path / "train.csv", index_col=False)
-    X_train = df_train.drop(columns=["target"])
-    y_train = df_train["target"]
-    pipe = Pipeline([
-        ("scaler", StandardScaler()),
-        ("clf", LogisticRegression(solver="lbfgs", max_iter=1000))
-        ])
-    pipe.fit(X_train, y_train)
+def fit_model(in_train_dataframe_folder_path: Path, out_model_folder_path: Path, run_id: str):
+
+    # Active l’autolog AVANT fit
+    mlflow.sklearn.autolog()  # ou mlflow.autolog()
+    mlflow.set_experiment("iris")
+
+    with mlflow.start_run(run_name=run_id):
+        df_train = pd.read_csv(in_train_dataframe_folder_path / "train.csv", index_col=False)
+        X_train = df_train.drop(columns=["target"])
+        y_train = df_train["target"]
+        pipe = Pipeline([
+            ("scaler", StandardScaler()),
+            ("clf", LogisticRegression(solver="lbfgs", max_iter=1000))
+            ])
+        pipe.fit(X_train, y_train)
+    
+
+
     joblib.dump(pipe, out_model_folder_path / "iris_model.joblib")
     return pipe
 
 
 @flow
-def train_flow(data_input_dir: Path, data_output_dir: Path, model_output_dir: Path) -> None:
+def train_flow(data_input_dir: Path, data_output_dir: Path, model_output_dir: Path, run_id: str) -> None:
     """
     
     """
     split_dataset(in_df_to_split_folder_path=data_input_dir, out_splitted_dfs_folder_path=data_output_dir)
-    fit_model(in_train_dataframe_folder_path=data_input_dir, out_model_folder_path=model_output_dir)
+    fit_model(in_train_dataframe_folder_path=data_input_dir, out_model_folder_path=model_output_dir, run_id=run_id)
     return None
 
 
 if __name__ == "__main__":
     # Lancement direct en local (sans DVC/MLflow, ni serveur Prefect nécessaire
     train_flow(
-        data_input_dir=Path('C:/Users/joule/work_repos/ml-api/scripts/iris/scripts/iris/runs/e6558b6f-0f1e-484f-8de6-5c49ee498a77/data'),
-        data_output_dir=Path('C:/Users/joule/work_repos/ml-api/scripts/iris/scripts/iris/runs/e6558b6f-0f1e-484f-8de6-5c49ee498a77/data'),
-        model_output_dir=Path('C:/Users/joule/work_repos/ml-api/scripts/iris/scripts/iris/runs/e6558b6f-0f1e-484f-8de6-5c49ee498a77/models')
+        data_input_dir=Path('C:/Users/joule/work_repos/ml-api/scripts/iris/testruns/2025-09-20_23h4145-d6fc14b1/data'),
+        data_output_dir=Path('C:/Users/joule/work_repos/ml-api/scripts/iris/testruns/2025-09-20_23h4145-d6fc14b1/data'),
+        model_output_dir=Path('C:/Users/joule/work_repos/ml-api/scripts/iris/testruns/2025-09-20_23h4145-d6fc14b1/models')
         )

@@ -26,7 +26,7 @@ def load_raw_data_from_csv(in_raw_data_folder: Path, out_clean_data_folder: Path
 
 
 @flow
-def prep_flow(in_raw_data_folder: Path, out_clean_data_folder: Path) -> None:
+def prep_flow(in_raw_data_folder: Path, out_clean_data_folder: Path, run_id: str) -> None:
     """
     Prépare le dataset Iris et écrit iris.csv + meta.json en local, orchestré par Prefect.
     """

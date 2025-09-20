@@ -35,7 +35,7 @@ def predict(in_model_folder_path: Path, in_test_df_folder_path: Path, out_predic
 
 
 @flow
-def score_flow(data_input_dir: Path, data_output_dir: Path, model_input_dir: Path) -> None:
+def score_flow(data_input_dir: Path, data_output_dir: Path, model_input_dir: Path, run_id: str) -> None:
     """
     
     """
