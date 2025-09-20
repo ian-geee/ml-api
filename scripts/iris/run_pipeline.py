@@ -9,7 +9,9 @@ from prefect.runtime import flow_run
 
 from prep_src.prep import prep_flow
 
-REPO_ROOT = Path(__file__).resolve().parents[2]  # racine = 2 niveaux au-dessus de scripts/iris
+IRIS_ROOT = Path(__file__).resolve().parents[0]  
+REPO_ROOT = Path(__file__).resolve().parents[2] # racine = 2 niveaux au-dessus de scripts/iris
+INPUT = Path(REPO_ROOT / "data" / "iris.csv").resolve()
 
 # @task
 # def run_step() -> None:
@@ -29,18 +31,23 @@ def make_output_dir(output: str) -> str:
     return str(out_dir.resolve())
 
 @flow(name="ml_pipeline", log_prints=True)
-def run_pipeline(absolute_repo_path: Path, output_rel_path_to_string: str) -> None:
+def run_pipeline() -> None:
     """
     
     """
     logger = get_run_logger()
     run_id = flow_run.id
     logger.info(run_id)
-    out_string = make_output_dir(output="runs/" + run_id)
-    prep_flow(output=out_string)
+
+    prep_out_string = make_output_dir(output="scripts/iris/runs/" + run_id + "/data")
+    make_output_dir(output="scripts/iris/runs/" + run_id + "/models")
+    make_output_dir(output="scripts/iris/runs/" + run_id + "/score")
+    make_output_dir(output="scripts/iris/runs/" + run_id + "/eval")
+
+    prep_flow(inputs=str(INPUT), output=prep_out_string)
     
     return None
 
 if __name__ == "__main__":
-    run_pipeline(REPO_ROOT, output_rel_path_to_string="run_id")    
-    print(REPO_ROOT)
+    run_pipeline()    
+    print(IRIS_ROOT)

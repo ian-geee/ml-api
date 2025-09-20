@@ -12,11 +12,6 @@ from sklearn.datasets import load_iris
 from prefect import flow, task, get_run_logger
 from prefect.assets import materialize
 
-
-REPO_ROOT = Path(__file__).resolve().parents[3]
-INPUT = Path(REPO_ROOT / "data" / "iris.csv").resolve()
-
-
 @task
 def make_output_dir(output: str) -> str:
     out_dir = Path(output)
@@ -31,11 +26,11 @@ def load_raw_data_from_csv(in_put: Path, outdir: str) -> pd.DataFrame:
 
 
 @flow
-def prep_flow(output: str) -> None:
+def prep_flow(inputs: str, output: str) -> None:
     """
     Prépare le dataset Iris et écrit iris.csv + meta.json en local, orchestré par Prefect.
     """
-    load_raw_data_from_csv(in_put=INPUT, outdir=output)
+    load_raw_data_from_csv(in_put=inputs, outdir=output)
     return None
 
 
