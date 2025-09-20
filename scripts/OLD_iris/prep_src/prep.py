@@ -20,7 +20,7 @@ def load_iris_data() -> Tuple[np.ndarray, np.ndarray, List[str], List[str]]:
     iris = load_iris()
     X: np.ndarray = iris.data
     y: np.ndarray = iris.target
-    feature_names = iris.features_names.tolist()
+    feature_names = ["sepal_length", "sepal_width", "petal_length", "petal_width"]
     class_names = iris.target_names.tolist()
     return X, y, feature_names, class_names
 
