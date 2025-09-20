@@ -1,0 +1,10 @@
+A lancer depuis le root du dossier
+
+python .\scripts\iris\prep_src\prep.py --output .\saves\iris
+
+python .\scripts\iris\train_src\train.py --data_csv .\saves\iris\iris.csv --meta_json .\saves\iris\meta.json --model_dir .\saves\iris\model_artifacts --model_out .\saves\iris\model_artifacts\iris_model.joblib --test_csv .\saves\iris\test_data.csv
+
+python .\scripts\iris\score.py --model .\saves\iris\model_artifacts\iris_model.joblib --test_csv .\saves\iris\test_data.csv --pred_csv .\saves\iris\predictions.csv
+
+python .\scripts\iris\eval.py --pred_csv .\saves\iris\predictions.csv --report_csv .\saves\iris\score_report.csv
+
