@@ -1,0 +1,2 @@
+Pipeline(steps=[('scaler', StandardScaler()),
+                ('clf', LogisticRegression(max_iter=1000))])

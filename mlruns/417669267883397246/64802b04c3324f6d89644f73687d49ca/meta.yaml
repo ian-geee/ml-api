@@ -1,0 +1,14 @@
+artifact_uri: file:///C:/Users/joule/work_repos/ml-api/mlruns/417669267883397246/64802b04c3324f6d89644f73687d49ca/artifacts
+end_time: 1758487972240
+entry_point_name: ''
+experiment_id: '417669267883397246'
+lifecycle_stage: active
+run_id: 64802b04c3324f6d89644f73687d49ca
+run_name: exultant-roo-256
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1758487963810
+status: 3
+tags: []
+user_id: joule

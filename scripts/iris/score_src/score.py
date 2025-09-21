@@ -22,15 +22,29 @@ from sklearn.linear_model import LogisticRegression
 
 @task
 def predict(in_model_folder_path: Path, in_test_df_folder_path: Path, out_predictions_df_folder_path: Path):
-
     pipe = joblib.load(in_model_folder_path / "iris_model.joblib")
+
     df_test = pd.read_csv(in_test_df_folder_path / "test.csv", index_col=False)
-    df_test_with_predictions = df_test.copy()
     X_test = df_test.drop(columns=["target"])
     y_pred = pipe.predict(X_test)
 
-    df_test_with_predictions["predicted_target"] = y_pred
-    df_test_with_predictions.to_csv(out_predictions_df_folder_path / "predictions.csv", index=False)
+    # Construit le DF de sortie
+    out = df_test.copy()
+    out["predicted_target"] = y_pred
+
+    # Saves probabilities if available, for roc, auc, log-loss, top-k
+    if hasattr(pipe, "predict_proba"):
+        proba = pipe.predict_proba(X_test)  # shape (n_samples, n_classes)
+        # Tente de récupérer les noms de classes du modèle (sinon indices)
+        try:
+            class_labels = pipe.classes_
+        except Exception:
+            class_labels = list(range(proba.shape[1]))
+        for j, cls in enumerate(class_labels):
+            out[f"proba_{cls}"] = proba[:, j]
+
+    out_path = out_predictions_df_folder_path / "predictions.csv"
+    out.to_csv(out_path, index=False)
     return None
 
 
@@ -46,7 +60,8 @@ def score_flow(data_input_dir: Path, data_output_dir: Path, model_input_dir: Pat
 if __name__ == "__main__":
     # Lancement direct en local (sans DVC/MLflow, ni serveur Prefect nécessaire
     score_flow(
-        data_input_dir=Path('C:/Users/joule/work_repos/ml-api/scripts/iris/runs/9d2143d3-fe1a-450b-9728-e0c3a30c373c/data'),
-        model_input_dir=Path('C:/Users/joule/work_repos/ml-api/scripts/iris/runs/9d2143d3-fe1a-450b-9728-e0c3a30c373c/models'),
-        data_output_dir=Path('C:/Users/joule/work_repos/ml-api/scripts/iris/runs/9d2143d3-fe1a-450b-9728-e0c3a30c373c/data'),
+        data_input_dir=Path('C:/Users/joule/work_repos/ml-api/scripts/iris/testruns/2025-09-20_23h4145-d6fc14b1/data'),
+        model_input_dir=Path('C:/Users/joule/work_repos/ml-api/scripts/iris/testruns/2025-09-20_23h4145-d6fc14b1/models'),
+        data_output_dir=Path('C:/Users/joule/work_repos/ml-api/scripts/iris/testruns/2025-09-20_23h4145-d6fc14b1/data'),
+        run_id="2025-09-20_23h4145-d6fc14b1"
         )

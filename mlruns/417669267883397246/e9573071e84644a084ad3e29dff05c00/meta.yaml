@@ -1,0 +1,14 @@
+artifact_uri: file:///C:/Users/joule/work_repos/ml-api/mlruns/417669267883397246/e9573071e84644a084ad3e29dff05c00/artifacts
+end_time: 1758487972240
+entry_point_name: ''
+experiment_id: '417669267883397246'
+lifecycle_stage: active
+run_id: e9573071e84644a084ad3e29dff05c00
+run_name: dashing-foal-147
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1758487963810
+status: 3
+tags: []
+user_id: joule
