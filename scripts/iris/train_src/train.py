@@ -56,10 +56,10 @@ def split_dataset(in_df_to_split_folder_path: Path, out_splitted_dfs_folder_path
 
 
 @task
-def make_folds(in_trainval_dataframe_folder_path: Path, out_json_folds_folder_path: Path, k: int = 5):
+def save_cv_kfolds_to_json(in_trainval_dataframe_folder_path: Path, out_json_folds_folder_path: Path, k: int = 5, random_state: int = 42):
     df = pd.read_csv(in_trainval_dataframe_folder_path / "trainval.csv")
     y = df["target"].to_numpy()
-    skf = StratifiedKFold(n_splits=k, shuffle=True, random_state=RANDOM_STATE)
+    skf = StratifiedKFold(n_splits=k, shuffle=True, random_state=random_state)
     out_json_folds_folder_path = (out_json_folds_folder_path / "trainval_folds")
     out_json_folds_folder_path.mkdir(parents=True, exist_ok=True)
     for i, (tr, va) in enumerate(skf.split(np.zeros(len(y)), y)):
