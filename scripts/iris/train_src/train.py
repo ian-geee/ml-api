@@ -17,7 +17,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn.linear_model import LogisticRegression
-from sklearn.model_selection import StratifiedKFold
+from sklearn.model_selection import StratifiedKFold, GridSearchCV
 
 import mlflow
 
@@ -56,39 +56,52 @@ def split_dataset(in_df_to_split_folder_path: Path, out_splitted_dfs_folder_path
 
 
 @task
-def save_cv_kfolds_to_json(in_trainval_dataframe_folder_path: Path, out_json_folds_folder_path: Path, k: int = 5, random_state: int = 42):
-    df = pd.read_csv(in_trainval_dataframe_folder_path / "trainval.csv")
-    y = df["target"].to_numpy()
-    skf = StratifiedKFold(n_splits=k, shuffle=True, random_state=random_state)
-    out_json_folds_folder_path = (out_json_folds_folder_path / "trainval_folds")
-    out_json_folds_folder_path.mkdir(parents=True, exist_ok=True)
-    for i, (tr, va) in enumerate(skf.split(np.zeros(len(y)), y)):
-        with (out_json_folds_folder_path / f"fold_{i}.json").open("w") as f:
-            json.dump({"train_idx": tr.tolist(), "val_idx": va.tolist()}, f, indent=2)
-
-
-
-@task
 def fit_model(in_train_dataframe_folder_path: Path, out_model_folder_path: Path, run_id: str):
 
-    # Active l’autolog AVANT fit
+    # Activer MLflow autolog AVANT tout fit
     mlflow.sklearn.autolog()  # ou mlflow.autolog()
     mlflow.set_experiment("iris")
 
     with mlflow.start_run(run_name=run_id):
-        df_train = pd.read_csv(in_train_dataframe_folder_path / "train.csv", index_col=False)
-        X_train = df_train.drop(columns=["target"])
-        y_train = df_train["target"]
+
+        df_train = pd.read_csv(in_train_dataframe_folder_path / "trainval.csv", index_col=False)
+        X_trainval = df_train.drop(columns=["target"])
+        y_trainval = df_train["target"]
+
+        # --- Pipeline ---
         pipe = Pipeline([
             ("scaler", StandardScaler()),
             ("clf", LogisticRegression(solver="lbfgs", max_iter=1000))
-            ])
-        pipe.fit(X_train, y_train)
-    
+        ])
 
+        # --- GridSearch uniquement sur C ---
+        param_grid = {"clf__C": [0.01, 0.1, 1.0, 10.0, 100.0]}
+        cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
 
-    joblib.dump(pipe, out_model_folder_path / "iris_model.joblib")
-    return pipe
+        grid = GridSearchCV(
+            estimator=pipe,
+            param_grid=param_grid,
+            scoring="accuracy",  # or whatevev, can use mutliple metrics too
+            cv=cv,
+            n_jobs=-1,
+            refit=True,           # réentraine sur tout X_train avec le meilleur C
+            return_train_score=True
+        )
+
+        grid.fit(X_trainval, y_trainval)
+
+        # Meilleur estimateur (réentraîné) -> on le persiste
+        best_est = grid.best_estimator_
+
+        # Optionnel : log explicite du meilleur C (autolog le fait déjà, mais c'est lisible)
+        mlflow.log_param("best_C", grid.best_params_["clf__C"])
+        mlflow.log_metric("best_cv_mean_val_accuracy", grid.best_score_)
+
+    # Sauvegarde du modèle choisi
+    out_path = out_model_folder_path / "iris_model.joblib"
+    joblib.dump(best_est, out_path)
+
+    return best_est
 
 
 @flow
@@ -97,7 +110,6 @@ def train_flow(data_input_dir: Path, data_output_dir: Path, model_output_dir: Pa
     
     """
     split_dataset(in_df_to_split_folder_path=data_input_dir, out_splitted_dfs_folder_path=data_output_dir)
-    make_folds(in_trainval_dataframe_folder_path=data_input_dir, out_json_folds_folder_path=data_input_dir, k=5)
     fit_model(in_train_dataframe_folder_path=data_input_dir, out_model_folder_path=model_output_dir, run_id=run_id)
     return None
 

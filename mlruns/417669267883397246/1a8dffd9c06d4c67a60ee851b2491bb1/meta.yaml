@@ -1,0 +1,14 @@
+artifact_uri: file:///C:/Users/joule/work_repos/ml-api/mlruns/417669267883397246/1a8dffd9c06d4c67a60ee851b2491bb1/artifacts
+end_time: 1758486869850
+entry_point_name: ''
+experiment_id: '417669267883397246'
+lifecycle_stage: active
+run_id: 1a8dffd9c06d4c67a60ee851b2491bb1
+run_name: thoughtful-koi-699
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1758486862003
+status: 3
+tags: []
+user_id: joule
