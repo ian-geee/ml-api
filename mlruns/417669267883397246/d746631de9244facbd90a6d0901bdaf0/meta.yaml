@@ -1,0 +1,14 @@
+artifact_uri: file:///C:/Users/joule/work_repos/ml-api/mlruns/417669267883397246/d746631de9244facbd90a6d0901bdaf0/artifacts
+end_time: 1758486722984
+entry_point_name: ''
+experiment_id: '417669267883397246'
+lifecycle_stage: active
+run_id: d746631de9244facbd90a6d0901bdaf0
+run_name: gentle-gull-655
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1758486713677
+status: 3
+tags: []
+user_id: joule

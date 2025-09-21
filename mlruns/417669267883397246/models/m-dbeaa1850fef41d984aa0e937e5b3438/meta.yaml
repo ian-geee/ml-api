@@ -1,0 +1,10 @@
+artifact_location: file:///C:/Users/joule/work_repos/ml-api/mlruns/417669267883397246/models/m-dbeaa1850fef41d984aa0e937e5b3438/artifacts
+creation_timestamp: 1758486867924
+experiment_id: '417669267883397246'
+last_updated_timestamp: 1758486869845
+model_id: m-dbeaa1850fef41d984aa0e937e5b3438
+model_type: null
+name: best_estimator
+source_run_id: 8cefdb24d536463e9b65780d6ff30944
+status: 2
+status_message: null

@@ -1,0 +1,14 @@
+artifact_uri: file:///C:/Users/joule/work_repos/ml-api/mlruns/417669267883397246/ddac6b6dc2434825b5bf98c5bc90bacf/artifacts
+end_time: 1758486869850
+entry_point_name: ''
+experiment_id: '417669267883397246'
+lifecycle_stage: active
+run_id: ddac6b6dc2434825b5bf98c5bc90bacf
+run_name: intrigued-calf-112
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1758486862003
+status: 3
+tags: []
+user_id: joule

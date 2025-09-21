@@ -1,0 +1,14 @@
+artifact_uri: file:///C:/Users/joule/work_repos/ml-api/mlruns/417669267883397246/8cefdb24d536463e9b65780d6ff30944/artifacts
+end_time: 1758486869993
+entry_point_name: ''
+experiment_id: '417669267883397246'
+lifecycle_stage: active
+run_id: 8cefdb24d536463e9b65780d6ff30944
+run_name: 2025-09-21_22h3415-fdc1fe9b
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1758486862003
+status: 3
+tags: []
+user_id: joule

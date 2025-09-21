@@ -1,4 +1,13 @@
-# Flower Classifier 🌸
+# ML-API 
+
+Contains multiple projects :
+- Binary Classification : In construction
+- Mutliclass Classification : Iris Classifier
+- Regression : House Price Estimator
+- Regression : Wine Quality Estimator
+- Mutlilabel Classification : TO DO (probably ANN (CNN) - object detection)
+- TimeSeries Forecasting : TO DO
+- LLM : TO DO
 
 Small project showing MLOps skills : API FastAPI + HTML page to **predict** flower type based on quantitative characteristics (open dataset Iris).
 

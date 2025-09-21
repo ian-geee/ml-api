@@ -1,0 +1,10 @@
+artifact_location: file:///C:/Users/joule/work_repos/ml-api/mlruns/417669267883397246/models/m-7c4ab4a385a74de7b36b8fd027036f73/artifacts
+creation_timestamp: 1758406826648
+experiment_id: '417669267883397246'
+last_updated_timestamp: 1758406829402
+model_id: m-7c4ab4a385a74de7b36b8fd027036f73
+model_type: null
+name: model
+source_run_id: fde798db89c246cbb9254d54673d7c1f
+status: 2
+status_message: null
