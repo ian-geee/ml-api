@@ -25,7 +25,7 @@ from sklearn.preprocessing import label_binarize  # pour ROC/PR si besoin
 
 
 def _extract_proba_matrix(df_pred: pd.DataFrame):
-    # récupère les colonnes "proba_*" dans l'ordre naturel des classes trouvées dans 'target'
+    # récupère les colonnes "proba_*" dans l'ordre des classes trouvées dans 'target'
     proba_cols = [c for c in df_pred.columns if c.startswith("proba_")]
     if not proba_cols:
         return None, None
@@ -63,15 +63,14 @@ def metrics_to_json(in_predictions_df_folder_path: Path, out_metrics_folder_path
         "recall_weighted": recall_score(y_true, y_pred, average="weighted", zero_division=0),
         "f1_macro": f1_score(y_true, y_pred, average="macro", zero_division=0),
         "f1_weighted": f1_score(y_true, y_pred, average="weighted", zero_division=0),
-        # jaccard (macro/weighted)
+        # autres scores utiles
         "jaccard_macro": jaccard_score(y_true, y_pred, average="macro", zero_division=0),
         "jaccard_weighted": jaccard_score(y_true, y_pred, average="weighted", zero_division=0),
-        # autres scores utiles
         "matthews_corrcoef": matthews_corrcoef(y_true, y_pred),
         "cohen_kappa": cohen_kappa_score(y_true, y_pred),
         "hamming_loss": hamming_loss(y_true, y_pred),
         "zero_one_loss": zero_one_loss(y_true, y_pred),
-        # confusion matrix + report texte
+        # confusion matrix + report
         "confusion_matrix": confusion_matrix(y_true, y_pred).tolist(),
         "classification_report": classification_report(y_true, y_pred, zero_division=0),
     }
@@ -94,7 +93,7 @@ def metrics_to_json(in_predictions_df_folder_path: Path, out_metrics_folder_path
         except Exception:
             pass
 
-        # Top-k accuracy (utile en multiclass) : k=2 et k=3 si nb classes >= k
+        # Top-k accuracy (utile en multiclass) : k=2 et k=3 si nb classes >= k 
         n_classes = proba.shape[1]
         if n_classes >= 2:
             try:
