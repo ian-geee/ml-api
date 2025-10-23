@@ -70,8 +70,6 @@ def fit_model(in_train_dataframe_folder_path: Path, out_model_folder_path: Path,
         X_trainval = df_train.drop(columns=["target"])
         y_trainval = df_train["target"]
 
-        y_trainval_log = np.log1p(y_trainval.clip(lower=0))
-
         # --- FLAML AutoML pour régression ---
         automl = AutoML()
         
@@ -91,7 +89,7 @@ def fit_model(in_train_dataframe_folder_path: Path, out_model_folder_path: Path,
         }
 
         # Entraînement automatique
-        automl.fit(X_train=X_trainval, y_train=y_trainval_log, **automl_settings)
+        automl.fit(X_train=X_trainval, y_train=y_trainval, **automl_settings)
 
         # Logs MLflow
         mlflow.log_param("best_estimator", automl.best_estimator)
@@ -103,7 +101,7 @@ def fit_model(in_train_dataframe_folder_path: Path, out_model_folder_path: Path,
         best_model = automl.model
 
     # Sauvegarde du modèle
-    out_path = out_model_folder_path / "house_model.joblib"
+    out_path = out_model_folder_path / "wine_model.joblib"
     joblib.dump(best_model, out_path)
 
     return best_model
@@ -121,8 +119,8 @@ def train_flow(data_input_dir: Path, data_output_dir: Path, model_output_dir: Pa
 if __name__ == "__main__":
     # Lancement direct en local (sans DVC/MLflow, ni serveur Prefect nécessaire
     train_flow(
-        data_input_dir=Path('C:/Users/joule/work_repos/ml-api/scripts/house/testruns/00000/data'),
-        data_output_dir=Path('C:/Users/joule/work_repos/ml-api/scripts/house/testruns/00000/data'),
-        model_output_dir=Path('C:/Users/joule/work_repos/ml-api/scripts/house/testruns/00000/models'),
+        data_input_dir=Path('C:/Users/joule/work_repos/ml-api/scripts/wine/testruns/00000/data'),
+        data_output_dir=Path('C:/Users/joule/work_repos/ml-api/scripts/wine/testruns/00000/data'),
+        model_output_dir=Path('C:/Users/joule/work_repos/ml-api/scripts/wine/testruns/00000/models'),
         run_id="00000"
         )

@@ -22,15 +22,12 @@ from sklearn.linear_model import LogisticRegression
 
 @task
 def predict(in_model_folder_path: Path, in_test_df_folder_path: Path, out_predictions_df_folder_path: Path):
-    pipe = joblib.load(in_model_folder_path / "house_model.joblib")
+    pipe = joblib.load(in_model_folder_path / "wine_model.joblib")
 
     df_test = pd.read_csv(in_test_df_folder_path / "test.csv", index_col=False)
     X_test = df_test.drop(columns=["target"])
     # Le modèle prédit en espace log, donc y_pred est déjà en log
-    y_pred_log = pipe.predict(X_test)
-    
-    # Inverse transformation pour avoir les prix réels
-    y_pred = np.expm1(y_pred_log)  # inverse de log1p
+    y_pred = pipe.predict(X_test)
 
     # Construit le DF de sortie
     out = df_test.copy()
@@ -53,8 +50,8 @@ def score_flow(data_input_dir: Path, data_output_dir: Path, model_input_dir: Pat
 if __name__ == "__main__":
     # Lancement direct en local (sans DVC/MLflow, ni serveur Prefect nécessaire
     score_flow(
-        data_input_dir=Path('C:/Users/joule/work_repos/ml-api/scripts/house/testruns/00000/data'),
-        model_input_dir=Path('C:/Users/joule/work_repos/ml-api/scripts/house/testruns/00000/models'),
-        data_output_dir=Path('C:/Users/joule/work_repos/ml-api/scripts/house/testruns/00000/data'),
+        data_input_dir=Path('C:/Users/joule/work_repos/ml-api/scripts/wine/testruns/00000/data'),
+        model_input_dir=Path('C:/Users/joule/work_repos/ml-api/scripts/wine/testruns/00000/models'),
+        data_output_dir=Path('C:/Users/joule/work_repos/ml-api/scripts/wine/testruns/00000/data'),
         run_id="00000"
         )
