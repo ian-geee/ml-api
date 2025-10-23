@@ -1,0 +1,67 @@
+from __future__ import annotations
+
+import os, re, shlex, subprocess, sys
+
+from datetime import datetime
+from zoneinfo import ZoneInfo
+from pathlib import Path
+from typing import Any, Dict
+
+from prefect import flow, task, get_run_logger
+from prefect.runtime import flow_run
+
+from prep_src.prep import prep_flow
+from train_src.train import train_flow
+from score_src.score import score_flow
+from eval_src.eval import eval_flow
+
+RANDOM_STATE = 42
+
+IRIS_ROOT = Path(__file__).resolve().parents[0]  
+REPO_ROOT = Path(__file__).resolve().parents[2] # racine = 2 niveaux au-dessus de scripts/iris
+
+RAW_DATA_PATH = (IRIS_ROOT / "data").resolve()
+
+DATE_TAG = datetime.now(ZoneInfo("Europe/Brussels")).strftime("%Y-%m-%d_%Hh%M%S")
+
+# @task
+# def run_step() -> None:
+#     """
+#     Exécute un step:
+#       - charge le composant
+#       - résout les placeholders
+#       - lance le process
+#       - retourne les outputs (chemins) pour usage downstream
+#     """
+#     return None
+
+@task
+def make_output_dir(output: str) -> Path:
+    out_dir = Path(output)
+    out_dir.mkdir(parents=True, exist_ok=True)
+    return out_dir.resolve()
+
+@flow(name="ml_pipeline", log_prints=True)
+def run_pipeline() -> None:
+    """
+    
+    """
+    logger = get_run_logger()
+    run_id = flow_run.id
+    logger.info(run_id)
+
+    cross_run_id = DATE_TAG + "-" + run_id[:8]
+
+    data_folder = make_output_dir(output="scripts/wine/runs/custom_runs/" + cross_run_id + "/data")
+    model_folder = make_output_dir(output="scripts/wine/runs/custom_runs/" + cross_run_id + "/models")
+    eval_folder = make_output_dir(output="scripts/wine/runs/custom_runs/" + cross_run_id + "/eval")
+
+    prep_flow(in_raw_data_folder=RAW_DATA_PATH, out_clean_data_folder=data_folder, run_id=cross_run_id)
+    train_flow(data_input_dir=data_folder, data_output_dir=data_folder, model_output_dir=model_folder, run_id=cross_run_id)
+    score_flow(data_input_dir=data_folder, model_input_dir=model_folder, data_output_dir=data_folder, run_id=cross_run_id)
+    eval_flow(data_input_dir=data_folder, metrics_output_dir=eval_folder, run_id=cross_run_id)
+    return None
+
+if __name__ == "__main__":
+    run_pipeline()    
+    print(IRIS_ROOT)
