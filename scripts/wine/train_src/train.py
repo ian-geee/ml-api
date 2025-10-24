@@ -5,6 +5,7 @@ import json
 import joblib
 from pathlib import Path
 from typing import List, Tuple
+from datetime import datetime
 
 import numpy as np
 import pandas as pd
@@ -103,6 +104,21 @@ def fit_model(in_train_dataframe_folder_path: Path, out_model_folder_path: Path,
     # Sauvegarde du modèle
     out_path = out_model_folder_path / "wine_model.joblib"
     joblib.dump(best_model, out_path)
+
+    # METADONNEES
+    data_metadata = {
+        "feature_order": X_trainval.columns.tolist(),
+        "target": "target",
+        "n_samples_train": len(X_trainval),
+        "model_type": automl.best_estimator,
+        "hyperparameters": automl.best_config,
+        "training_date": datetime.now().isoformat(),
+        "flaml_best_loss": automl.best_loss,
+    }
+
+    # Sauvegarde avec les données
+    with open(out_model_folder_path / "data_model_metadata.json", "w") as f:
+        json.dump(data_metadata, f, indent=2)
 
     return best_model
 

@@ -5,9 +5,11 @@ import json
 import joblib
 from pathlib import Path
 from typing import List, Tuple
+from datetime import datetime
 
 import numpy as np
 import pandas as pd
+
 from sklearn.datasets import load_iris
 
 from prefect import flow, task, get_run_logger
@@ -100,6 +102,37 @@ def fit_model(in_train_dataframe_folder_path: Path, out_model_folder_path: Path,
     # Sauvegarde du modèle choisi
     out_path = out_model_folder_path / "iris_model.joblib"
     joblib.dump(best_est, out_path)
+
+    # METADONNEES
+    # Extraire le modèle final du pipeline
+    final_clf = best_est.named_steps['clf']
+
+    model_metadata = {
+        # Données
+        "feature_order": X_trainval.columns.tolist(),
+        "target": "target",
+        "classes": np.unique(y_trainval).tolist(),
+        "n_classes": len(np.unique(y_trainval)),
+        "n_samples_train": len(X_trainval),
+        
+        "model_type": type(final_clf).__name__,  # "LogisticRegression"
+        "model_architecture": str(best_est),      # pipeline
+        
+        # Hyperparamètres optimaux
+        "best_params": grid.best_params_,  # Dict complet des meilleurs params
+        "hyperparameters": final_clf.get_params(),  # TOUS les params du modèle final
+        
+        # Performance (metrics pour validation des hyperparamètres =/= evaluation sur unseen data)
+        "cv_mean_accuracy": float(grid.best_score_),
+        "cv_std_accuracy": float(grid.cv_results_["std_test_score"][grid.best_index_]),
+    
+        "training_date": datetime.now().isoformat(),
+        "cv_folds": cv.n_splits,
+    }
+
+    # Sauvegarde avec les données
+    with open(out_model_folder_path / "data_model_metadata.json", "w") as f:
+        json.dump(model_metadata, f, indent=2)
 
     return best_est
 
