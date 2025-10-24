@@ -1,0 +1,24 @@
+{
+  "feature_order": [
+    "volatile acidity",
+    "total sulfur dioxide",
+    "sulphates",
+    "alcohol"
+  ],
+  "target": "target",
+  "n_samples_train": 1279,
+  "model_type": "lgbm",
+  "hyperparameters": {
+    "n_estimators": 23,
+    "num_leaves": 6,
+    "min_child_samples": 15,
+    "learning_rate": 0.2878234994905406,
+    "log_max_bin": 5,
+    "colsample_bytree": 0.8171220148372926,
+    "reg_alpha": 0.0016453415742803139,
+    "reg_lambda": 1.2114919082338034
+  },
+  "training_date": "2025-10-24T12:10:11.715876",
+  "flaml_best_loss": 0.6130741336926474,
+  "n_samples_test": 320
+}

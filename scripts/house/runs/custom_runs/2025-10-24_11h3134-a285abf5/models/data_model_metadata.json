@@ -1,0 +1,29 @@
+{
+  "feature_order": [
+    "habitable_surface",
+    "bedrooms_count",
+    "post_code",
+    "num_facade"
+  ],
+  "categorical": [
+    "post_code"
+  ],
+  "target": "price",
+  "currency": "EUR",
+  "n_samples_train": 8495,
+  "transform": "log1p",
+  "model_type": "lgbm",
+  "hyperparameters": {
+    "n_estimators": 126,
+    "num_leaves": 8,
+    "min_child_samples": 23,
+    "learning_rate": 0.49873981100184794,
+    "log_max_bin": 8,
+    "colsample_bytree": 0.8553549142846876,
+    "reg_alpha": 0.15706189300869017,
+    "reg_lambda": 0.02355195448483593
+  },
+  "training_date": "2025-10-24T11:31:52.364340",
+  "flaml_best_loss": 0.23776838133719935,
+  "n_samples_test": 2124
+}

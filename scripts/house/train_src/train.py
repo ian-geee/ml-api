@@ -8,7 +8,7 @@ from typing import List, Tuple
 
 import numpy as np
 import pandas as pd
-from sklearn.datasets import load_iris
+from datetime import datetime
 
 from prefect import flow, task, get_run_logger
 from prefect.assets import materialize
@@ -105,6 +105,24 @@ def fit_model(in_train_dataframe_folder_path: Path, out_model_folder_path: Path,
     # Sauvegarde du modèle
     out_path = out_model_folder_path / "house_model.joblib"
     joblib.dump(best_model, out_path)
+
+    # METADONNEES
+    data_metadata = {
+        "feature_order": X_trainval.columns.tolist(),
+        "categorical": ["post_code"],  # ou détection auto
+        "target": "target",
+        "currency": "EUR",
+        "n_samples_train": len(X_trainval),
+        "transform": "log1p",
+        "model_type": automl.best_estimator,
+        "hyperparameters": automl.best_config,
+        "training_date": datetime.now().isoformat(),
+        "flaml_best_loss": automl.best_loss,
+    }
+
+    # Sauvegarde avec les données
+    with open(out_model_folder_path / "data_model_metadata.json", "w") as f:
+        json.dump(data_metadata, f, indent=2)
 
     return best_model
 

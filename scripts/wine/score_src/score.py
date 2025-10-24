@@ -26,6 +26,19 @@ def predict(in_model_folder_path: Path, in_test_df_folder_path: Path, out_predic
 
     df_test = pd.read_csv(in_test_df_folder_path / "test.csv", index_col=False)
     X_test = df_test.drop(columns=["target"])
+
+    # METADONNEES 
+    with open(in_model_folder_path / "data_model_metadata.json", "r") as f:
+        model_metadata = json.load(f)
+
+    data_metadata = {
+        **model_metadata,
+        "n_samples_test": len(X_test)
+    }
+
+    with open(in_model_folder_path / "data_model_metadata.json", "w") as f:
+        json.dump(data_metadata, f, indent=2)
+
     # Le modèle prédit en espace log, donc y_pred est déjà en log
     y_pred = pipe.predict(X_test)
 

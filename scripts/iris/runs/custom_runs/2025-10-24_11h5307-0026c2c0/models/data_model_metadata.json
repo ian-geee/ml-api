@@ -1,0 +1,43 @@
+{
+  "feature_order": [
+    "sepal length (cm)",
+    "sepal width (cm)",
+    "petal length (cm)",
+    "petal width (cm)"
+  ],
+  "target": "target",
+  "classes": [
+    0,
+    1,
+    2
+  ],
+  "n_classes": 3,
+  "n_samples_train": 120,
+  "model_type": "LogisticRegression",
+  "model_architecture": "Pipeline(steps=[('scaler', StandardScaler()),\n                ('clf', LogisticRegression(C=10.0, max_iter=1000))])",
+  "best_params": {
+    "clf__C": 10.0
+  },
+  "hyperparameters": {
+    "C": 10.0,
+    "class_weight": null,
+    "dual": false,
+    "fit_intercept": true,
+    "intercept_scaling": 1,
+    "l1_ratio": null,
+    "max_iter": 1000,
+    "multi_class": "deprecated",
+    "n_jobs": null,
+    "penalty": "l2",
+    "random_state": null,
+    "solver": "lbfgs",
+    "tol": 0.0001,
+    "verbose": 0,
+    "warm_start": false
+  },
+  "cv_mean_accuracy": 0.9666666666666668,
+  "cv_std_accuracy": 0.031180478223116186,
+  "training_date": "2025-10-24T11:53:22.753636",
+  "cv_folds": 5,
+  "n_samples_test": 30
+}
